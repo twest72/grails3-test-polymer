@@ -1,0 +1,26 @@
+{
+  "name": "polymer-test2",
+  "version": "0.0.1",
+  "authors": [
+    "Thomas Westphal <westphal@it-factum.de>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "paper-elements": "PolymerElements/paper-elements#~1.0.1",
+    "google-chart": "GoogleWebComponents/google-chart#~1.0.0",
+    "google-map": "GoogleWebComponents/google-map#~1.0.0",
+    "pk-datepicker": "~1.0.1",
+    "moment": "~2.10.3",
+    "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^1.0.0",
+    "iron-pages": "PolymerElements/iron-pages#~1.0.0",
+    "roboto-fontface": "~0.4.2"
+  }
+}

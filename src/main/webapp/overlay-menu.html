@@ -1,0 +1,48 @@
+<link rel="import" href="polymer/bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="polymer/bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="overlay-panel.html">
+
+<dom-module id="overlay-menu" relative>
+
+    <style>
+        :host {
+            display: block;
+        }
+
+        overlay-panel {
+            padding: 6px;
+        }
+    </style>
+
+    <template>
+        <overlay-panel panel-position="relative">
+            <paper-menu>
+                <template is="dom-repeat" items="{{menuItems}}">
+                    <paper-item>{{item.name}}</paper-item>
+                </template>
+            </paper-menu>
+        </overlay-panel>
+    </template>
+
+</dom-module>
+
+<script>
+
+    (function () {
+        Polymer({
+            is: 'overlay-menu',
+
+            properties: {
+                menuItems: {
+                    type: Array
+//                    ,
+//                    observer: 'menuItemsChanged'
+                }
+            },
+
+            reflectToAttribute: true
+        });
+    })();
+
+</script>

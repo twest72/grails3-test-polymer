@@ -1,0 +1,28 @@
+<dom-module id="address-form">
+    <style>
+        :host {
+            display: block;
+        }
+    </style>
+    <template>
+        <paper-input class="paper-font-body2" label="Address Type" value="{{addressData.addressType.name}}"></paper-input>
+        <paper-input class="paper-font-body2" label="Street Address" value="{{addressData.street}}"></paper-input>
+        <paper-input class="paper-font-body2" label="City" value="{{addressData.city}}"></paper-input>
+        <paper-input class="paper-font-body2" label="Zip Code" value="{{addressData.zip}}"></paper-input>
+        <paper-input class="paper-font-body2" label="State" value="{{addressData.state}}"></paper-input>
+        <paper-input class="paper-font-body2" label="Country" value="{{addressData.country}}"></paper-input>
+    </template>
+</dom-module>
+<script>
+    (function () {
+        Polymer({
+            is: 'address-form',
+            properties: {
+                addressData: {
+                    type: Object,
+                    value: function() { return {}; }
+                }
+            }
+        });
+    })();
+</script>

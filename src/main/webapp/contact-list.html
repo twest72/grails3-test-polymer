@@ -1,0 +1,140 @@
+<link rel="import" href="address-form.html">
+<link rel="import" href="paper-date-input.html">
+
+<dom-module id="contact-list">
+    <style>
+        :host {
+            display: block;
+            @apply(--layout-horizontal);
+        }
+
+        [table] {
+            @apply(--layout-vertical);
+            @apply(--layout-flex);
+        }
+
+        [action] {
+            @apply(--layout-vertical);
+        }
+
+        [action] > paper-fab {
+            margin: 12px 24px 12px 12px;
+        }
+
+        .table {
+            display: table;
+        }
+
+        .header {
+            color: #8a8a8a;
+        }
+
+        .row, .header {
+            display: table-row;
+        }
+
+        .row:hover {
+            background-color: #eeeeee;
+            cursor: hand;
+        }
+
+        .cell {
+            display: table-cell;
+            height: 48px;
+            vertical-align: middle;
+        }
+
+        div.row > div.cell {
+            border-top: 1px solid #a6a6a6;
+        }
+
+        .first {
+            padding-left: 24px;
+            padding-right: 56px;
+        }
+
+        .middle {
+            padding-right: 56px;
+        }
+
+        .last {
+            padding-right: 24px;
+        }
+
+    </style>
+    <template>
+        <iron-ajax id="contactAjax" url="http://localhost:8080/contact/list" handle-as="json" on-response="_handleResponse"></iron-ajax>
+
+        <div action>
+            <paper-fab id="new" icon="social:person-add" on-click="_navigateNewContact"></paper-fab>
+        </div>
+
+        <div table>
+            <div class="table">
+
+                <div class="header">
+                    <div class="cell first">ID</div>
+                    <div class="cell middle">First Name</div>
+                    <div class="cell last">Last Name</div>
+                </div>
+                <template id="contactList" is="dom-repeat" items="{{contactListData}}" as="contactData">
+                    <div class="row" on-click="_navigateOpenContact">
+                        <div class="dataId" hidden>{{contactData.id}}</div>
+                        <div class="cell first">{{contactData.id}}</div>
+                        <div class="cell middle">{{contactData.firstName}}</div>
+                        <div class="cell last">{{contactData.lastName}}</div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+    var loadData = function () {
+    };
+
+    (function () {
+        Polymer({
+            is: 'contact-list',
+            properties: {
+                contactListData: {
+                    type: Array,
+                    value: function () {
+                        return {};
+                    }
+                },
+                selectedId: {
+                    type: Number,
+                    notify: true
+                }
+            },
+
+            ready: function () {
+                this.contactListData = [];
+                this.loadData();
+            },
+
+            loadData: function () {
+                this.$.contactAjax.params.max = 20;
+                this.$.contactAjax.generateRequest();
+            },
+
+            _handleResponse: function (request) {
+                console.log(request.detail.response);
+                console.log(this.$.contactAjax.lastResponse);
+                this.contactListData = this.$.contactAjax.lastResponse;
+            },
+
+            _navigateNewContact: function (event) {
+                this.selectedId = undefined;
+                this.fire("change-page", 1);
+            },
+
+            _navigateOpenContact: function (event) {
+                var dataIdElement = Polymer.dom(event.target).parentNode.querySelector('.dataId');
+                this.selectedId = parseInt(dataIdElement.textContent);
+                this.fire("change-page", 1);
+            }
+        });
+    })();
+</script>

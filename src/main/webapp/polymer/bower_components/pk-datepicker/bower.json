@@ -1,0 +1,22 @@
+{
+  "name": "pk-datepicker",
+  "version": "1.0.1",
+  "description": "Custom element to pick a date and a time. Created with polymer.",
+  "license": "MIT",
+  "main": "dist/pk-datepicker.html",
+  "keywords": [
+    "polymer",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "i18n-msg": "pkaske/i18n-msg#^1.0.0",
+    "fa-awesome": "^1.1.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.1"
+  }
+}

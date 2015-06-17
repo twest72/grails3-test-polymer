@@ -1,0 +1,90 @@
+<link rel="import" href="polymer/bower_components/iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="my-greeting">
+    <style>
+        :host {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            h1.paper-font-display1 {
+                font-size: 24px;
+            }
+        }
+
+        .mygroups {
+            @apply(--layout-horizontal);
+        }
+
+        .group {
+            margin: 10px 30px;
+        }
+        .row {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <template>
+        <div class="mygroups">
+
+            <div class="group">
+                <h1 class="paper-font-display1"><span>{{greeting}}</span>, <span>{{greetingName}}</span>!</h1>
+                <span class="paper-font-body2">Update text to change the greeting.</span>
+                <!-- Listens for "input" event and sets greeting to <input>.value -->
+                <paper-input class="paper-font-body2" label="Greeting" value="{{greeting}}"></paper-input>
+                <paper-input class="paper-font-body2" label="Your Name" value="{{greetingName::input}}"></paper-input>
+            </div>
+            <div class="group">
+                <div class="row">
+                    <paper-checkbox checked="{{checked}}">Test</paper-checkbox>
+                </div>
+                <div class="row">
+                    <paper-checkbox checked="{{!checked}}">Test</paper-checkbox>
+                </div>
+                <div class="row">
+                    <paper-toggle-button></paper-toggle-button>
+                </div>
+            </div>
+            <div class="group">
+                <paper-radio-group selected="{{selected}}">
+                    <paper-radio-button name="small">Small</paper-radio-button>
+                    <paper-radio-button name="medium">Medium</paper-radio-button>
+                    <paper-radio-button name="large">Large</paper-radio-button>
+                </paper-radio-group>
+                <paper-input class="paper-font-body2" label="Radio Value" disabled="true" value="{{selected}}"></paper-input>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+    var loadData = function () {
+    };
+
+    (function () {
+        Polymer({
+            is: 'my-greeting',
+            properties: {
+                greeting: {
+                    type: String,
+                    value: 'Welcome',
+                    notify: true
+                },
+                greetingName: {
+                    type: String,
+                    value: 'you',
+                    notify: true
+                },
+                checked: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+                selected: {
+                    type: String,
+                    value: 'small',
+                    notify: true
+                }
+            }
+        });
+    })();
+</script>

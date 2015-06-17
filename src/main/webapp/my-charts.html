@@ -1,0 +1,46 @@
+<link rel="import" href="polymer/bower_components/google-chart/google-chart.html">
+
+<dom-module id="my-charts">
+    <style>
+        :host {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            h1.paper-font-display1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+    <template>
+        <iron-ajax id="chartAjax" url="http://localhost:8080/polymer/chartData" handle-as="json" on-response="handleResponse"></iron-ajax>
+        <google-chart type='pie' options='{"title": "Distribution of days in year"}' data="{{chartData}}"></google-chart>
+        <paper-input class="paper-font-body2" label="Chart Values" disabled="true" value="{{chartData}}"></paper-input>
+    </template>
+</dom-module>
+<script>
+    (function () {
+        Polymer({
+            is: 'my-charts',
+            properties: {
+                chartData: {
+                    type: Array,
+                    notify: false
+                }
+            },
+
+            ready: function () {
+                this.chartData = [
+                    ["Month", "Days"]
+                ];
+                this.$.chartAjax.generateRequest();
+            },
+
+            handleResponse: function (request) {
+                console.log(request.detail.response);
+                console.log(this.$.chartAjax.lastResponse);
+                this.chartData = this.$.chartAjax.lastResponse;
+            }
+        });
+    })();
+</script>

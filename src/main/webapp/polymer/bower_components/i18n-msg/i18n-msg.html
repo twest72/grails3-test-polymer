@@ -1,0 +1,266 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="observer.html">
+
+<!-- Copyright Eric Bidelman <ebidel@gmail.com> -->
+
+<!--
+`<i18n-msg>` is a client-side solution for i18n message string replacement. It is modeled off the [Chrome extension i18n API](https://developer.chrome.com/extensions/i18n), which uses a `messages.json` file format.
+The file contains localized strings for the language in question.
+
+To set the language across your site, define `I18nMsg.lang` in your main page:
+
+    document.addEventListener('HTMLImportsLoaded', function() {
+      I18nMsg.lang = 'es';
+    });
+
+<b>Note:</b> this is done in `HTMLImportsLoaded` so `I18nMsg` will be defined by
+the time you set `I18nMsg.lang`. This timing is necessary under the polyfill and is
+<b>not needed if the browser supports HTML Imports</b>, natively.
+
+### Message files
+
+Setting a language instructs `<i18n-msg>` to read message ids from a predefined
+file on your server. For example, `I18nMsg.lang = 'es'` will use `locales/es.json`.
+`I18nMsg.lang = 'fr'` would use message strings from `locales/fr.json`.
+
+The directory name can be configured by using the `messagesUrl` attribute, but the file
+cannot. `<i18n-msg>` will always attempt to use messages from `<messagesUrl>/<LANG_YOU_SET>.json`.
+
+<b>Note:</b> - message files are read once and reused for all instances of `<i18n-msg>`.
+
+### Fallback text
+
+If an appropriate message file can't be found, the `textContent` of the element is used as fallback text.
+
+    <i18n-msg msgid="unknownmsgid">fallback text</i18n-msg>
+
+### Full example
+
+    <html lang="es">
+      ...
+      <body>
+        <p>"Days" in Spanish is <i18n-msg msgid="days">days</i18n-msg>!</p>
+
+        <script>
+          I18nMsg.lang = document.documentElement.lang || 'en';
+        </script>
+      </body>
+    </html>
+
+### Gettting a message:
+
+    // No argument returns the instance's message:
+    document.querySelector('i18n-msg').getMessage();
+
+    // Get a message by an id:
+    document.querySelector('i18n-msg').getMessage('days');
+
+@element i18n-msg
+@homepage https://ebidel.github.io/i18n-msg
+-->
+<!--
+Fired when the set language is ready.
+
+@event i18n-language-ready
+@param {Object} detail
+@param {string} detail.language Object full of messages for the set language.
+-->
+<dom-module id="i18n-msg">
+</dom-module>
+<script>
+    (function () {
+
+        window.I18nMsg = window.I18nMsg || {
+            lang: null,
+            url: 'locales',
+            locales: {}
+        };
+
+        var instances = [];
+
+        var fetching_ = false;
+        /* If if there's an outstanding XHR fetching a locale file. */
+
+        var numInstancesUpdated_ = 0;
+
+        Polymer({
+            is: 'i18n-msg',
+
+            properties: {
+                /**
+                 * The message id (key) for this message.
+                 *
+                 * @attribute msgid
+                 * @type string
+                 * @default null
+                 */
+                msgid: {
+                    type: String,
+                    value: null
+                },
+
+                /**
+                 * The set language being used.
+                 *
+                 * @property language
+                 * @type string
+                 * @default null
+                 * @readonly
+                 */
+                language: {
+                    type: String,
+                    value: null,
+                    observer: 'languageChanged'
+                }
+            },
+
+            /**
+             * The folder name where the localized `<lang>.json` files are located.
+             *
+             * @attribute messagesUrl
+             * @type string
+             * @default 'locales'
+             */
+            messagesUrl: 'locales',
+
+            /**
+             * An object containing the set of known language locales that have been loaded.
+             *
+             * @property locales
+             * @type object
+             * @default {}
+             */
+            locales: I18nMsg.locales, // static
+
+            ready: function () {
+                this.language = I18nMsg.lang;
+                this.messagesUrl = I18nMsg.url;
+
+                // Have instances observe window.I18nMsg.lang changes
+                // and go fetch the localized messages.json file.
+                var observerLang = new PathObserver(window.I18nMsg, 'lang');
+                observerLang.open(function (newValue, oldValue) {
+                    numInstancesUpdated_ = 0;
+                    this.language = newValue;
+                }.bind(this));
+
+                // Have instances observe window.I18nMsg.lang changes
+                // and go fetch the localized messages.json file.
+                var observerUrl = new PathObserver(window.I18nMsg, 'url');
+                observerUrl.open(function (newValue, oldValue) {
+                    numInstancesUpdated_ = 0;
+                    this.messagesUrl = newValue;
+
+                    if (!this.language || fetching_) {
+                        return;
+                    }
+
+                    this.fetchLanguage();
+                }.bind(this));
+
+                instances.push(this);
+            },
+
+            attached: function () {
+                if (!this.msgid) {
+                    this.msgid = this.innerHTML;
+                }
+
+                var msg = this.locales[this.language] && this.locales[this.language][this.msgid];
+                if (msg && msg.message) {
+                    this.innerHTML = msg.message;
+                }
+            },
+
+            languageChanged: function () {
+                // Don't fetch .json file if it has already been
+                // fetched or another instance is already trying to.
+                if (this.language && this.locales[this.language] && !fetching_) {
+                    // Send one signal that language changed to outside.
+                    if (numInstancesUpdated_ == instances.length - 1) {
+                        this.fire('i18n-language-ready', {language: this.language});
+                    }
+
+                    this.updateElementMessage();
+                    numInstancesUpdated_++;
+
+                    return;
+                } else if (!this.language || this.locales[this.language] || fetching_) {
+                    return;
+                }
+
+                this.fetchLanguage();
+            },
+
+            fetchLanguage: function() {
+                fetching_ = true;
+
+                var url = this.messagesUrl + '/' + this.language + '.json';
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.onload = function (e) {
+                    if (e.target.status != 200) {
+                        fetching_ = false;
+                        return;
+                    }
+
+                    var resp = JSON.parse(e.target.response);
+                    if (!this.msgid in resp) {
+                        console.warn(this.localName + ': "' + this.msgid + '" message id was not found in ' + url);
+                        return;
+                    }
+
+                    this.locales[this.language] = resp; // cache this locale.
+
+                    this.notifyInstances();
+
+                    fetching_ = false;
+
+                    this.fire('i18n-language-ready', {language: this.language});
+                }.bind(this);
+                xhr.send();
+            },
+
+            updateElementMessage: function (opt_instance) {
+                var instance = opt_instance || this;
+
+                var msg = instance.locales[instance.language][instance.msgid];
+                if (msg && msg.message) {
+                    instance.innerHTML = msg.message;
+                }
+            },
+
+            notifyInstances: function () {
+                for (var i = 0, instance; instance = instances[i]; ++i) {
+                    instance.language = I18nMsg.lang;
+
+                    if (!instance.locales[instance.language][instance.msgid]) {
+                        console.warn(this.localName + ': "' + instance.msgid + '" message id was not found');
+                        continue;
+                    }
+
+                    this.updateElementMessage(instance);
+                }
+            },
+
+            /**
+             * Returns a message in the current locale (set by `window.I18nMsg.lang`).
+             * @method getMsg
+             * @param {string=} opt_msgId Optional message id to lookup. If left off,
+             * the instance's `msgid` property is used.
+             * @return {string|null} Translated message or `null` if not found.
+             */
+            getMsg: function (opt_msgId) {
+                var msgId = opt_msgId || this.msgid;
+                var lang = this.locales[this.language];
+                if (lang && lang[msgId]) {
+                    return lang[msgId].message;
+                }
+                return null;
+            }
+
+        });
+
+    })();
+</script>

@@ -1,0 +1,35 @@
+<!-- Import element -->
+<link rel="import" href="polymer/bower_components/google-map/google-map.html">
+<link rel="import" href="polymer/bower_components/iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="my-map">
+    <style>
+        google-map {
+            height: 200px;
+            width: 50%;
+            margin: 10px;
+        }
+
+        .my-maps {
+            /* layout properties for a local DOM element */
+            @apply(--layout-horizontal);
+        }
+    </style>
+    <template>
+        <div class="my-maps">
+            <google-map latitude="51.341765" longitude="12.373952" zoom="15" fit-to-markers>
+                <google-map-marker latitude="51.341765" longitude="12.373952" title="it factum Leipzig"></google-map-marker>
+            </google-map>
+            <google-map latitude="52.456339" longitude="13.363040" zoom="15" fit-to-markers>
+                <google-map-marker latitude="52.456339" longitude="13.363040" title="it factum München"></google-map-marker>
+            </google-map>
+        </div>
+    </template>
+</dom-module>
+<script>
+    (function () {
+        Polymer({
+            is: 'my-map'
+        });
+    })();
+</script>

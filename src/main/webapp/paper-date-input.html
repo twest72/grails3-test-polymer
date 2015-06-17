@@ -1,0 +1,133 @@
+<link rel="import" href="polymer/bower_components/polymer/polymer.html">
+<link rel="import" href="polymer/bower_components/iron-validatable-behavior/iron-validatable-behavior.html">
+<link rel="import" href="polymer/bower_components/paper-input/paper-input.html">
+
+<dom-module id="paper-date-input" relative>
+
+    <style>
+        :host {
+            display: block;
+        }
+    </style>
+
+    <template>
+        <paper-input id="dateInput" on-blur="{{onBlur}}" class="paper-input-input" label="{{label}}" value="{{_displayValue}}" maxlength="10" auto-validate
+                     pattern="[0-9]{2}(.)[0-9]{2}(.)[0-9]{4}" error-message="Date format must be DD.MM.YYYY!"></paper-input>
+    </template>
+
+</dom-module>
+
+<script>
+
+    (function () {
+        Polymer({
+            is: 'paper-date-input',
+
+            properties: {
+                value: {
+                    notify: true,
+                    type: String,
+                    observer: '_computeValue'
+                },
+
+                _displayValue: {
+                    type: String
+                },
+
+                _onblur: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+
+            observers: [
+                '_computeDisplayValue(_displayValue)'
+            ],
+
+            behaviors: [
+                Polymer.PaperInputBehavior,
+                Polymer.IronFormElementBehavior
+            ],
+
+            ready: function () {
+                this.$.dateInput.$.input.onfocus = function (e) {
+                    this.parentElement.parentElement.parentElement.parentElement._onblur = false;
+                };
+                this.$.dateInput.$.input.onblur = function (e) {
+                    this.parentElement.parentElement.parentElement.parentElement._onblur = true;
+                    this.parentElement.parentElement.parentElement.parentElement._computeDisplayValue(this.value);
+                    this.parentElement.parentElement.parentElement.parentElement._onblur = false;
+                };
+            },
+
+            _computeValue: function (newValue, oldValue) {
+                if (this._onblur == true) {
+                    return;
+                }
+//                console.log('_computeValue - value: ' + this.value);
+//                console.log('_computeValue - _displayValue: ' + this._displayValue);
+
+                var newDisplayValue;
+                if (newValue === '' || newValue === null || newValue === undefined) {
+                    newDisplayValue = '';
+                } else {
+                    newDisplayValue = moment(newValue, "YYYY-MM-DD").format('L');
+                }
+
+                if (newDisplayValue != this._displayValue) {
+                    this._displayValue = newDisplayValue;
+                    console.log('_computeValue - _displayValue: ' + this._displayValue);
+                }
+            },
+
+            _computeDisplayValue: function (_displayValue) {
+                if (this._onblur == false && _displayValue != '' && _displayValue.length != 10) {
+                    return;
+                }
+//                console.log('_computeDisplayValue - value: ' + this.value);
+//                console.log('_computeDisplayValue - _displayValue: ' + this._displayValue);
+
+                var newValue;
+                if (!this._isValidDateString(_displayValue)) {
+                    newValue = '';
+                } else {
+                    var date = moment(_displayValue, 'L');
+                    newValue = date.format("YYYY-MM-DD");
+                    if (newValue === null || newValue === undefined || newValue === 'Invalid date') {
+                        newValue = '';
+//                        this.invalid = true;
+                    }
+                }
+
+                if (newValue != this.value) {
+                    this.value = newValue;
+//                    this.invalid = false;
+                    console.log('_computeDisplayValue - value: ' + this.value);
+                }
+            },
+
+            _isValidDateString: function (value) {
+
+                var parsedDate = Date.parse(value);
+                if (!parsedDate) {
+                    return false;
+                }
+
+                if (window.navigator.language == 'de') {
+                    var separator = '.';
+                    var dateAsArray = value.split(separator);
+                    var date = new Date(dateAsArray[2], dateAsArray[1] - 1, dateAsArray[0]);
+                    var convertedDate = (("0" + date.getDate()).slice(-2)) + separator + (("0" + (date.getMonth() + 1)).slice(-2)) + separator + date.getFullYear();
+                } else {
+                    var separator = '-';
+                    var dateAsArray = value.split(separator);
+                    var date = new Date(dateAsArray[0], dateAsArray[1] - 1, dateAsArray[2]);
+                    var convertedDate = date.getFullYear() + separator + (("0" + (date.getMonth() + 1)).slice(-2)) + separator + (("0" + date.getDate()).slice(-2));
+                }
+                return value == convertedDate;
+            }
+
+        });
+    })();
+
+</script>

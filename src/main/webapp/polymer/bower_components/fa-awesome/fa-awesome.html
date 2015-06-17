@@ -1,0 +1,90 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example with label
+
+    <fa-awesome icon="flag">A label for the icon</fa-awesome>
+
+##### Example with label placed on the left side
+
+    <fa-awesome icon="chevron-right" label-left>Go right</fa-awesome>
+
+@element fa-awesome
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://pkaske.github.io/fa-awesome
+-->
+<dom-module id="fa-awesome">
+    <link rel="import" type="css" href="fa-awesome.css">
+    <link rel="import" type="css" href="../font-awesome/css/font-awesome.min.css">
+    <template>
+        <div id="wrap">
+            <i id="i" class="fa"></i>
+            <span id="label"><content></content></span>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'fa-awesome',
+
+        properties: {
+            /**
+             * Name of the font awesome icon to show. Use the pure name without the 'fa-'.
+             *
+             * @property icon
+             * @type string
+             * @default ''
+             */
+            icon: {
+                type: String,
+                observer: 'iconChanged',
+                value: 'flag'
+            },
+
+            size: {
+                type: String,
+                observer: 'sizeChanged',
+                value: ''
+            },
+
+            /**
+             * If the 'label-left' attribute is set the label is placed left (instead of right) from the icon.
+             *
+             * @property labelLeft
+             * @type bool
+             * @default false
+             */
+            labelLeft: {
+                type: Boolean,
+                observer: 'labelLeftChanged'
+            }
+        },
+
+        iconChanged: function(newValue, oldValue) {
+            this.toggleClass('fa-' + oldValue, false, this.$.i);
+            this.toggleClass('fa-' + newValue, true, this.$.i);
+        },
+
+        sizeChanged: function(newValue, oldValue) {
+            if (newValue != 'lg' && newValue != '') {
+                this.size = newValue = parseInt(newValue) + 'x';
+            }
+
+            if (newValue == '') {
+                this.toggleClass('fa-' + oldValue, false, this.$.i);
+                return;
+            }
+
+            this.toggleClass('fa-' + oldValue, false, this.$.i);
+            this.toggleClass('fa-' + newValue, true, this.$.i);
+        },
+
+        labelLeftChanged: function(newValue) {
+            this.toggleClass('reverse', newValue, this.$.wrap);
+        }
+    });
+</script>

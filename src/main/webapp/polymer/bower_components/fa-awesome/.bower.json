@@ -1,0 +1,29 @@
+{
+  "name": "fa-awesome",
+  "version": "1.1.0",
+  "authors": [
+    "Peter Kaske"
+  ],
+  "description": "Polymer element that shows icons of font-awesome. Build with Polymer 0.9.",
+  "license": "MIT",
+  "keywords": [
+    "polymer",
+    "web-components"
+  ],
+  "main": "fa-awesome.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "font-awesome": "~4.3.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#~1.0.1"
+  },
+  "homepage": "https://github.com/pkaske/fa-awesome",
+  "_release": "1.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.1.0",
+    "commit": "05826ba687eab7b2d59aeacad3695faa5c6357cb"
+  },
+  "_source": "git://github.com/pkaske/fa-awesome.git",
+  "_target": "^1.1.0",
+  "_originalSource": "fa-awesome"
+}

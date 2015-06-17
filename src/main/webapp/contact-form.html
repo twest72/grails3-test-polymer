@@ -1,0 +1,147 @@
+<link rel="import" href="address-form.html">
+<link rel="import" href="paper-date-input.html">
+
+<dom-module id="contact-form">
+    <style>
+        :host {
+            display: block;
+            @apply(--layout-horizontal);
+        }
+
+        [form] {
+            @apply(--layout-vertical);
+            @apply(--layout-flex);
+        }
+
+        [action] {
+            @apply(--layout-vertical);
+        }
+
+        [action] > paper-fab {
+            margin: 12px 24px 12px 12px;
+        }
+
+        div#adress-title {
+            margin-top: 24px;
+        }
+
+        address-form {
+            margin-top: 12px;
+        }
+
+        paper-fab#save {
+            --paper-fab-background: var(--paper-green-500);
+        }
+
+    </style>
+    <template>
+        <iron-ajax id="ajaxLoadData" handle-as="json" on-response="_handleLoadResponse"></iron-ajax>
+
+        <iron-ajax id="ajaxSaveData" handle-as="json" on-response="_handleSaveResponse" method="POST" content-type="application/json" url="http://localhost:8080/contact/save"></iron-ajax>
+
+        <div action>
+            <paper-fab id="list" icon="list" on-click="_navigateToContactList"></paper-fab>
+            <paper-fab id="save" icon="save" on-click="_saveContact" disabled></paper-fab>
+        </div>
+
+        <div form>
+            <paper-input class="paper-font-body2" label="First Name" value="{{contactData.firstName}}"></paper-input>
+            <paper-input class="paper-font-body2" label="Last Name" value="{{contactData.lastName}}"></paper-input>
+            <paper-input class="paper-font-body2" label="Title" value="{{contactData.title}}"></paper-input>
+            <!--<paper-input class="paper-font-body2" label="Birthday" value="{{contactData.birthDate}}"></paper-input>-->
+            <paper-date-input id="date" class="paper-input-input paper-font-body2" label="Birthday" value="{{contactData.birthDate}}"></paper-date-input>
+
+            <div id="adress-title" class="paper-font-title">Adresses</div>
+            <template is="dom-repeat" items="{{contactData.addresses}}">
+                <address-form address-data="{{item}}"></address-form>
+            </template>
+        </div>
+    </template>
+</dom-module>
+<script>
+    (function () {
+        Polymer({
+            is: 'contact-form',
+            properties: {
+                contactData: {
+                    type: Object,
+                    observer: '_newContactData'
+                },
+                unsavedChanges: {
+                    type: Boolean,
+                    value: false,
+                    observer: '_unsavedChangesObserver'
+                },
+                selectedId: {
+                    type: Number,
+                    notify: true,
+                    observer: '_selectedIdChanged'
+                }
+            },
+
+            observers: [
+                '_contactDataChanged(contactData.*)'
+            ],
+
+            ready: function () {
+                this.contactData = {};
+            },
+
+            _newContactData: function() {
+                this.$.date._computeValue(this.contactData.birthDate, null);
+            },
+
+            _navigateToContactList: function () {
+                this.fire("change-page", 0);
+            },
+
+            _saveContact: function () {
+                console.log('SAVE');
+                console.log(this.contactData);
+                if(this.contactData.birthDate == undefined || this.contactData.birthDate == '') {
+                    delete this.contactData.birthDate;
+                }
+                this.$.ajaxSaveData.body = JSON.stringify(this.contactData);
+                this.$.ajaxSaveData.headers = csrfHeader;
+                console.log(this.$.ajaxSaveData.body);
+                this.$.ajaxSaveData.generateRequest();
+            },
+
+            _contactDataChanged: function () {
+                this.unsavedChanges = true;
+            },
+
+            _unsavedChangesObserver: function () {
+                if(this.unsavedChanges) {
+                    this.$.save.style.background = '#f44336';
+                    Polymer.dom(this.$.save).removeAttribute('disabled')
+                } else {
+                    this.$.save.style.background = '#4caf50';
+                    Polymer.dom(this.$.save).setAttribute('disabled')
+                }
+            },
+
+            _selectedIdChanged: function () {
+                if (!isNaN(this.selectedId) && this.selectedId != undefined) {
+                    this.$.ajaxLoadData.url = "http://localhost:8080/contact/show/" + this.selectedId;
+                    this.$.ajaxLoadData.generateRequest();
+                } else {
+                    this.contactData = {};
+                    this.unsavedChanges = false;
+                }
+            },
+
+            _handleLoadResponse: function (request) {
+                console.log(request.detail.response);
+                console.log(this.$.ajaxLoadData.lastResponse);
+                this.contactData = this.$.ajaxLoadData.lastResponse;
+                this.unsavedChanges = false;
+            },
+
+            _handleSaveResponse: function (request) {
+                console.log(request.detail.response);
+                this.unsavedChanges = false;
+            }
+        });
+    })();
+</script>

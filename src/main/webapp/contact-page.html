@@ -1,0 +1,47 @@
+<link rel="import" href="polymer/bower_components/iron-pages/iron-pages.html">
+
+<dom-module id="contact-page">
+    <style>
+        :host {
+            display: block;
+        }
+    </style>
+    <template>
+
+        <iron-pages id="pages" selected="0">
+            <contact-list id="contactList" selected-id="{{selectedId}}" on-change-page="_changePage"></contact-list>
+            <contact-form selected-id="{{selectedId}}" on-change-page="_changePage"></contact-form>
+        </iron-pages>
+    </template>
+</dom-module>
+<script>
+    var loadData = function () {
+    };
+
+    (function () {
+        Polymer({
+            is: 'contact-page',
+
+            ready: function () {
+                //BUG https://github.com/PolymerElements/iron-pages/issues/3
+                var p = this.$.pages;
+                p.activateEvent = '';
+            },
+
+            properties: {
+                selectedId: {
+                    type: Number,
+                    value: undefined,
+                    notify: true
+                }
+            },
+
+            _changePage: function (event, newPage) {
+                this.$.pages.select(newPage);
+                if(newPage == 0) {
+                    this.$.contactList.loadData();
+                }
+            }
+        });
+    })();
+</script>

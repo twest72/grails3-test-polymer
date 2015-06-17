@@ -1,0 +1,90 @@
+<link rel="import" href="polymer/bower_components/polymer/polymer.html">
+<link rel="import" href="polymer/bower_components/paper-styles/paper-styles-classes.html">
+<link rel="import" href="polymer/bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+
+<dom-module id="overlay-panel" relative>
+
+    <style>
+        :host {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--paper-menu-background-color, --primary-background-color);
+            color: var(--paper-menu-color, --primary-text-color);
+            padding: 24px;
+            box-shadow: rgba(0, 0, 0, 0.24) -2.3408942051048403px 5.524510324047423px 12.090680100755666px 0px, rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+        }
+    </style>
+
+    <template>
+        <div id="overlay-panel">
+            <content></content>
+        </div>
+    </template>
+
+</dom-module>
+
+<script>
+
+    (function () {
+
+        Polymer({
+            is: 'overlay-panel',
+
+            properties: {
+                panelPosition: {
+                    type: String,
+                    value: 'center'
+                }
+            },
+
+            behaviors: [
+                Polymer.IronOverlayBehavior
+            ],
+
+            dialogOpenClickHandler: function (eventSourceElement) {
+                if (this.panelPosition == 'center') {
+                    this.style.top = 'auto';
+                    this.style.left = 'auto';
+                    this.fit();
+                } else if (this.panelPosition == 'relative') {
+                    var targetPosition = this._getPosition(eventSourceElement);
+                    this.style.top = (targetPosition.top + targetPosition.height) + 'px';
+                    this.style.left = targetPosition.left + 'px';
+                }
+                this.open();
+            },
+
+            _getPosition: function (o) {
+                var r = {top: 0, left: 0, width: 0, height: 0};
+
+                if (!o) return r;
+
+                if (typeof o != 'object') return r;
+
+                if (typeof o.offsetTop != 'undefined') {
+                    r.height = o.offsetHeight;
+                    r.width = o.offsetWidth;
+                    r.left = r.top = 0;
+                    while (o && o.tagName != 'BODY') {
+                        r.top += parseInt(o.offsetTop);
+                        r.left += parseInt(o.offsetLeft);
+                        o = o.offsetParent;
+                    }
+                }
+                return r;
+            }
+
+        });
+
+    })();
+
+    Components = {};
+    Components.OverlayPanel = {
+        clickHandler: function (eventSourceElement) {
+            document.getElementById('overlay-panel').parentElement.dialogOpenClickHandler(eventSourceElement);
+        }
+    };
+
+</script>
